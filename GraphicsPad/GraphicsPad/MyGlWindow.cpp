@@ -1,5 +1,6 @@
 #include "gl/glew.h"
 #include "MyGlWindow.h"
+#include <stdio.h>
 
 MyGlWindow::MyGlWindow()
 {
@@ -51,5 +52,7 @@ void MyGlWindow::drawGL()
 void MyGlWindow::initializeGL()
 {
 	glewExperimental = true;
-	glewInit();
+	GLenum result = glewInit();
+
+	printf("glewInit return %d\n", result);
 }
