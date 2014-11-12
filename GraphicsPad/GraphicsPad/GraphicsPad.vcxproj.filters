@@ -8,5 +8,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MyGlWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MyGlWindow.h" />
   </ItemGroup>
 </Project>
