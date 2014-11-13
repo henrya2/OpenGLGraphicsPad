@@ -1,6 +1,33 @@
 #include "gl/glew.h"
 #include "MyGlWindow.h"
+#include <map>
 #include <stdio.h>
+
+static int g_width = 0;
+static int g_height = 0;
+
+std::map<void*, MyGlWindow*> g_mapedGlWindows;
+
+static void windowsSizeChangeCallback(GLFWwindow* window, int width, int height)
+{
+	auto iter = g_mapedGlWindows.find(window);
+
+	if (iter != g_mapedGlWindows.end())
+	{
+		iter->second->_width = width;
+		iter->second->_height = height;
+	}
+}
+
+static void registerGlWindow(GLFWwindow* window, MyGlWindow* glWindow)
+{
+	g_mapedGlWindows[window] = glWindow;
+}
+
+static void unRegisterGlWindow(GLFWwindow* window)
+{
+	g_mapedGlWindows.erase(window);
+}
 
 MyGlWindow::MyGlWindow()
 {
@@ -9,6 +36,10 @@ MyGlWindow::MyGlWindow()
 
 MyGlWindow::~MyGlWindow()
 {
+	if (_window)
+	{
+		unRegisterGlWindow(_window);
+	}
 }
 
 int MyGlWindow::show()
@@ -25,11 +56,22 @@ int MyGlWindow::show()
 		return -1;
 	}
 
+	
+
+	glfwSetWindowSizeCallback(_window, &windowsSizeChangeCallback);
+
+	registerGlWindow(_window, this);
+
 	glfwMakeContextCurrent(_window);
 
 	initializeGL();
 
 	return 0;
+}
+
+void MyGlWindow::refreshWindowSize()
+{
+	glfwGetWindowSize(_window, &_width, &_height);
 }
 
 void MyGlWindow::run()
@@ -45,6 +87,8 @@ void MyGlWindow::run()
 
 void MyGlWindow::drawGL()
 {
+	glViewport(0, 0, width(), height());
+
 	glClearColor(1, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -70,4 +114,14 @@ void MyGlWindow::initializeGL()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+}
+
+int MyGlWindow::width()
+{
+	return _width;
+}
+
+int MyGlWindow::height()
+{
+	return _height;
 }

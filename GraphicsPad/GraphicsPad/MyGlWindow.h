@@ -4,6 +4,7 @@
 
 class MyGlWindow
 {
+	friend void windowsSizeChangeCallback(GLFWwindow* window, int width, int height);
 public:
 	MyGlWindow();
 	~MyGlWindow();
@@ -12,12 +13,18 @@ public:
 
 	void run();
 
+	int width();
+	int height();
+
 protected:
 	void drawGL();
 
 	void initializeGL();
-
+	void refreshWindowSize();
 private:
 	GLFWwindow* _window;
+
+	int _width;
+	int _height;
 };
 
