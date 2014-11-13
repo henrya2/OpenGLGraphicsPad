@@ -4,7 +4,7 @@ int main()
 {
 	MyGlWindow myWindow;
 
-	myWindow.show();
+	myWindow.show("GraphicsPad");
 	myWindow.run();
 
 	glfwTerminate();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glfw/glfw3.h>
+#include <string>
 
 class MyGlWindow
 {
@@ -9,7 +10,7 @@ public:
 	MyGlWindow();
 	~MyGlWindow();
 
-	int show(int width = -1, int height = -1);
+	int show(const std::string& title, int width = -1, int height = -1);
 
 	void run();
 

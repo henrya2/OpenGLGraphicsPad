@@ -42,7 +42,7 @@ MyGlWindow::~MyGlWindow()
 	}
 }
 
-int MyGlWindow::show(int width, int height)
+int MyGlWindow::show(const std::string& title, int width, int height)
 {
 	/* Intialize the library*/
 	if (!glfwInit())
@@ -62,7 +62,7 @@ int MyGlWindow::show(int width, int height)
 	}
 
 	/* Create a windowed mode window and its OpenGL context */
-	_window = glfwCreateWindow(showWidth, showHeight, "Hello World", NULL, NULL);
+	_window = glfwCreateWindow(showWidth, showHeight, title.c_str(), NULL, NULL);
 	if (!_window)
 	{
 		glfwTerminate();
@@ -105,7 +105,7 @@ void MyGlWindow::drawGL()
 	glClearColor(1, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void MyGlWindow::initializeGL()
@@ -117,7 +117,11 @@ void MyGlWindow::initializeGL()
 
 	GLfloat verts[] =
 	{
-		+0.0f, +1.0f,
+		 0.0f,  0.0f,
+		+1.0f, +1.0f,
+		-1.0f, +1.0f,
+
+		 0.0f,  0.0f,
 		-1.0f, -1.0f,
 		+1.0f, -1.0f
 	};
