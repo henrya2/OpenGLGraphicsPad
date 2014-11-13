@@ -47,6 +47,8 @@ void MyGlWindow::drawGL()
 {
 	glClearColor(1, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void MyGlWindow::initializeGL()
@@ -55,4 +57,17 @@ void MyGlWindow::initializeGL()
 	GLenum result = glewInit();
 
 	printf("glewInit return %d\n", result);
+
+	GLfloat verts[] =
+	{
+		+0.0f, +1.0f,
+		-1.0f, -1.0f,
+		+1.0f, -1.0f
+	};
+	GLuint myBufferId;
+	glGenBuffers(1, &myBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, myBufferId);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 }
