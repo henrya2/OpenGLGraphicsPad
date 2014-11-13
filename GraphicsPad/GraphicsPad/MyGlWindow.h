@@ -9,7 +9,7 @@ public:
 	MyGlWindow();
 	~MyGlWindow();
 
-	int show();
+	int show(int width = -1, int height = -1);
 
 	void run();
 

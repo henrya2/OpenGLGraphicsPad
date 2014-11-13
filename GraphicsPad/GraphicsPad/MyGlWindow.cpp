@@ -3,10 +3,10 @@
 #include <map>
 #include <stdio.h>
 
-static int g_width = 0;
-static int g_height = 0;
-
 std::map<void*, MyGlWindow*> g_mapedGlWindows;
+
+const int defaultWindowWidth = 640;
+const int defaultWindowHeight = 480;
 
 static void windowsSizeChangeCallback(GLFWwindow* window, int width, int height)
 {
@@ -42,21 +42,34 @@ MyGlWindow::~MyGlWindow()
 	}
 }
 
-int MyGlWindow::show()
+int MyGlWindow::show(int width, int height)
 {
 	/* Intialize the library*/
 	if (!glfwInit())
 		return -1;
 
+	int showWidth, showHeight;
+
+	if (width < 0 || height < 0)
+	{
+		showWidth = defaultWindowWidth;
+		showHeight = defaultWindowHeight;
+	}
+	else
+	{
+		showWidth = width;
+		showHeight = height;
+	}
+
 	/* Create a windowed mode window and its OpenGL context */
-	_window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	_window = glfwCreateWindow(showWidth, showHeight, "Hello World", NULL, NULL);
 	if (!_window)
 	{
 		glfwTerminate();
 		return -1;
 	}
 
-	
+	refreshWindowSize();
 
 	glfwSetWindowSizeCallback(_window, &windowsSizeChangeCallback);
 
