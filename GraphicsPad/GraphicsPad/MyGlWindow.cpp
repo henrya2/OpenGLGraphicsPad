@@ -3,10 +3,10 @@
 #include <map>
 #include <stdio.h>
 
-std::map<void*, MyGlWindow*> g_mapedGlWindows;
+static std::map<void*, MyGlWindow*> g_mapedGlWindows;
 
-const int defaultWindowWidth = 640;
-const int defaultWindowHeight = 480;
+static const int defaultWindowWidth = 640;
+static const int defaultWindowHeight = 480;
 
 static void windowsSizeChangeCallback(GLFWwindow* window, int width, int height)
 {
@@ -31,8 +31,8 @@ static void unRegisterGlWindow(GLFWwindow* window)
 
 MyGlWindow::MyGlWindow()
 {
-}
 
+}
 
 MyGlWindow::~MyGlWindow()
 {
