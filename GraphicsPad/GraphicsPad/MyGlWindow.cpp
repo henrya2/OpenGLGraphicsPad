@@ -2,6 +2,7 @@
 #include "MyGlWindow.h"
 #include <map>
 #include <stdio.h>
+#include <iostream>
 
 static std::map<void*, MyGlWindow*> g_mapedGlWindows;
 
@@ -36,16 +37,12 @@ void sendDataToOpenGL()
 {
 	GLfloat verts[] =
 	{
-		0.0f, 0.0f,
-		+1.0f, +0.0f, +0.0f,
-		+1.0f, +1.0f,
-		+1.0f, +0.0f, +0.0f,
-		-1.0f, +1.0f,
+		 0.0f, +1.0f,
 		+1.0f, +0.0f, +0.0f,
 		-1.0f, -1.0f,
-		+1.0f, +0.0f, +0.0f,
+		+0.0f, +1.0f, +0.0f,
 		+1.0f, -1.0f,
-		+1.0f, +0.0f, +0.0f
+		+0.0f, +0.0f, +1.0f
 	};
 	GLuint vertexBufferId;
 	glGenBuffers(1, &vertexBufferId);
@@ -59,12 +56,43 @@ void sendDataToOpenGL()
 	GLushort indices[] =
 	{
 		0, 1, 2,
-		0, 3, 4
 	};
 	GLuint indexBufferId;
 	glGenBuffers(1, &indexBufferId);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+}
+
+bool checkStatus(GLuint objectID, PFNGLGETSHADERIVPROC objectPropertyGetterFunc, PFNGLGETSHADERINFOLOGPROC getInfoLogFunc, GLenum statusType)
+{
+	GLint status;
+	objectPropertyGetterFunc(objectID, statusType, &status);
+	if (status != GL_TRUE)
+	{
+		GLint infoLogLength;
+		objectPropertyGetterFunc(objectID, GL_INFO_LOG_LENGTH, &infoLogLength);
+		std::string buffer;
+		buffer.resize(infoLogLength);
+		GLsizei bufferSize;
+		getInfoLogFunc(objectID, infoLogLength, &bufferSize, &buffer[0]);
+
+		std::cout << buffer << std::endl;
+
+		return false;
+	}
+
+	return true;
+}
+
+bool checkShaderStatus(GLuint shaderId)
+{
+
+	return checkStatus(shaderId, glGetShaderiv, glGetShaderInfoLog, GL_COMPILE_STATUS);
+}
+
+bool checkProgramStatus(GLuint programId)
+{
+	return checkStatus(programId, glGetProgramiv, glGetProgramInfoLog, GL_LINK_STATUS);
 }
 
 void initialShaders()
@@ -81,10 +109,16 @@ void initialShaders()
 	glCompileShader(vertexShaderId);
 	glCompileShader(fragmentShaderId);
 
+	if (!checkShaderStatus(vertexShaderId) || !checkShaderStatus(fragmentShaderId))
+		return;
+
 	GLuint programId = glCreateProgram();
 	glAttachShader(programId, vertexShaderId);
 	glAttachShader(programId, fragmentShaderId);
 	glLinkProgram(programId);
+
+	if (!checkProgramStatus(programId))
+		return;
 
 	glUseProgram(programId);
 }
