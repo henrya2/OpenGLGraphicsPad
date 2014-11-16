@@ -9,8 +9,10 @@
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MyGlWindow.cpp" />
+    <ClCompile Include="ShaderCode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyGlWindow.h" />
+    <ClInclude Include="ShaderCode.h" />
   </ItemGroup>
 </Project>
