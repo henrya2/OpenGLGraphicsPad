@@ -3,6 +3,7 @@
 #include <map>
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 
 static std::map<void*, MyGlWindow*> g_mapedGlWindows;
 
@@ -29,9 +30,6 @@ static void unRegisterGlWindow(GLFWwindow* window)
 {
 	g_mapedGlWindows.erase(window);
 }
-
-extern const char* vertexShaderCode;
-extern const char* fragmentShaderCode;
 
 void sendDataToOpenGL()
 {
@@ -95,15 +93,32 @@ bool checkProgramStatus(GLuint programId)
 	return checkStatus(programId, glGetProgramiv, glGetProgramInfoLog, GL_LINK_STATUS);
 }
 
+std::string readShaderCode(const std::string& fileName)
+{
+	std::ifstream inputStream(fileName.c_str());
+	if (!inputStream)
+	{
+		std::cout << "File failed to load..." << fileName;
+		exit(1);
+	}
+	return std::string(
+		std::istreambuf_iterator<char>(inputStream),
+		std::istreambuf_iterator<char>());
+}
+
 void initialShaders()
 {
 	GLuint vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
 
+	std::string shaderSourceCode;
+
 	const char* adapter[1];
-	adapter[0] = vertexShaderCode;
+	shaderSourceCode = readShaderCode("../Data/Shaders/VertexShader.vert");
+	adapter[0] = shaderSourceCode.c_str();
 	glShaderSource(vertexShaderId, 1, adapter, 0);
-	adapter[0] = fragmentShaderCode;
+	shaderSourceCode = readShaderCode("../Data/Shaders/FragmentShader.frag");
+	adapter[0] = shaderSourceCode.c_str();
 	glShaderSource(fragmentShaderId, 1, adapter, 0);
 
 	glCompileShader(vertexShaderId);
