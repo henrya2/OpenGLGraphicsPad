@@ -31,36 +31,6 @@ static void unRegisterGlWindow(GLFWwindow* window)
 	g_mapedGlWindows.erase(window);
 }
 
-void sendDataToOpenGL()
-{
-	GLfloat verts[] =
-	{
-		 0.0f, +1.0f,
-		+1.0f, +0.0f, +0.0f,
-		-1.0f, -1.0f,
-		+0.0f, +1.0f, +0.0f,
-		+1.0f, -1.0f,
-		+0.0f, +0.0f, +1.0f
-	};
-	GLuint vertexBufferId;
-	glGenBuffers(1, &vertexBufferId);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (char*)(2 * sizeof(float)));
-
-	GLushort indices[] =
-	{
-		0, 1, 2,
-	};
-	GLuint indexBufferId;
-	glGenBuffers(1, &indexBufferId);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-}
-
 bool checkStatus(GLuint objectID, PFNGLGETSHADERIVPROC objectPropertyGetterFunc, PFNGLGETSHADERINFOLOGPROC getInfoLogFunc, GLenum statusType)
 {
 	GLint status;
@@ -138,6 +108,59 @@ void initialShaders()
 	glUseProgram(programId);
 }
 
+const float X_DELTA = 0.1f;
+const unsigned int NUM_VERTICES_PER_TRI = 3;
+const unsigned int NUM_FLOATS_PER_VERTICE = 6;
+const unsigned int TRIANGLE_BYTE_SIZE = NUM_VERTICES_PER_TRI * NUM_FLOATS_PER_VERTICE * sizeof(float);
+const unsigned int MAX_TRIS = 20;
+
+unsigned int numTris = 0;
+
+void sendDataToOpenGL()
+{
+	GLuint vertexBufferId;
+	glGenBuffers(1, &vertexBufferId);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	glBufferData(GL_ARRAY_BUFFER, MAX_TRIS * TRIANGLE_BYTE_SIZE, nullptr, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (char*)(3 * sizeof(float)));
+}
+
+void sendAnotherTriToOpenGL()
+{
+	if (numTris >= MAX_TRIS)
+		return;
+
+	const GLfloat THIS_TRI_X = -1 + numTris * X_DELTA;
+	GLfloat thisTri[] =
+	{
+		THIS_TRI_X, 1.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+
+		THIS_TRI_X + X_DELTA, 1.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+
+		THIS_TRI_X, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f
+	};
+	glBufferSubData(GL_ARRAY_BUFFER, numTris * TRIANGLE_BYTE_SIZE, TRIANGLE_BYTE_SIZE, thisTri);
+
+	numTris++;
+}
+
+void MyGlWindow::drawGL()
+{
+	glViewport(0, 0, width(), height());
+
+	glClearColor(0, 0, 0, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	sendAnotherTriToOpenGL();
+	glDrawArrays(GL_TRIANGLES, 0, numTris * NUM_VERTICES_PER_TRI);
+}
+
 MyGlWindow::MyGlWindow()
 {
 
@@ -207,22 +230,14 @@ void MyGlWindow::run()
 	}
 }
 
-void MyGlWindow::drawGL()
-{
-	glViewport(0, 0, width(), height());
-
-	glClearColor(0, 0, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-}
-
 void MyGlWindow::initializeGL()
 {
 	glewExperimental = true;
 	GLenum result = glewInit();
 
 	printf("glewInit return %d\n", result);
+
+	glEnable(GL_DEPTH_TEST);
 
 	sendDataToOpenGL();
 	initialShaders();
